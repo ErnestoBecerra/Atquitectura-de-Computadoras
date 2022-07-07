@@ -1,0 +1,118 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.std_logic_arith.all;
+use IEEE.std_logic_unsigned.all;
+
+entity FileReg is
+    Port ( writeReg, readReg1,readReg2,shamt : in STD_LOGIC_VECTOR (3 downto 0);
+           writeData : in STD_LOGIC_VECTOR (15 downto 0);
+           clk,clr,wr,she,dir : in STD_LOGIC;
+           readData1,readData2 : out STD_LOGIC_VECTOR (15 downto 0));
+end FileReg;
+
+architecture Behavioral of FileReg is
+type palabra is array (0 to 15) of std_logic_vector(writeData'length-1 downto 0);
+signal banco: palabra;
+begin
+    process(clk,clr)
+    variable posBanco,readl,dos_i: integer;
+    variable auxShift,resShift: std_logic_vector(writeData'length-1 downto 0);
+    variable  N : integer := writeData'length;
+    begin
+        readl := conv_integer(readReg1);
+        posBanco :=conv_integer(writeReg);
+        if(clr='1') then
+            banco<=(others=>(others=>'0'));
+        elsif(rising_edge(clk)) then
+            if(wr='1' and she='0') then
+                banco(posBanco) <= writeData;
+        elsif(wr='1' and she='1' and dir='0') then -- shift right
+            auxShift := banco(readl);
+            resShift := banco(readl);
+            for i in 0 to shamt'length-1 loop
+                dos_i:= 2**i;
+                for j in 0 to N-dos_i-1 loop
+                    if(shamt(i)='1') then
+                        resShift(j) := auxShift(j+dos_i);
+                    end if;  
+                end loop;
+                for j in N-dos_i to N-1 loop
+                    if(shamt(i)='1') then
+                        resShift(j) := '0';
+                    end if; 
+                end loop;
+                auxShift:=resShift;
+            end loop; 
+            banco(posBanco) <= resShift;     
+        elsif(wr='1' and she='1' and dir='1') then -- shift left
+            auxShift := banco(readl);
+            resShift := banco(readl);
+            for i in 0 to shamt'length-1 loop
+                dos_i:= 2**i;
+                for j in 0 to dos_i-1 loop
+                    if(shamt(i)='1') then
+                        resShift(j) := '0';
+                    end if;  
+                end loop;
+                
+                for j in dos_i to N-1 loop
+                    if(shamt(i)='1') then
+                        resShift(j) := auxShift(j-dos_i);
+                    end if; 
+                end loop;
+                auxShift:=resShift;
+            end loop;
+            banco(posBanco) <= resShift;   
+        end if;
+    end if;
+    end process;
+    readData1 <=banco(conv_integer(readReg1));
+    readData2 <=banco(conv_integer(readReg2));
+
+
+end Behavioral;
+
+
+######################################################
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity FileReg is generic ( n : integer := 15 ); port (
+	write_reg, read_reg_1, read_reg_2, shamt : in std_logic_vector ( 3 downto 0 );
+	read_data_1, read_data_2 : out std_logic_vector ( n downto 0 );
+	write_data : in std_logic_vector ( n downto 0 );
+	clear, clock, wr, she, dir : in std_logic
+	);
+end FileReg;
+
+architecture ar_register_file of FileReg is
+
+	type registers is array ( 0 to n ) of std_logic_vector ( n downto 0 );
+	signal reg_file : registers;
+
+	begin
+
+		process ( clear, clock )
+		begin
+			if ( clear = '1' ) then
+				for i in 0 to n loop
+					reg_file(i) <= ( others => '0' );
+				end loop;
+			elsif ( clock'event and clock = '1' ) then
+				if ( wr = '1' and she = '0' ) then
+					reg_file(to_integer(unsigned(write_reg))) <= write_data;
+				end if;
+				if ( wr = '1' and she = '1' and dir = '0' ) then -- Right shift.
+					reg_file(to_integer(unsigned(write_reg))) <= std_logic_vector ( unsigned(reg_file(to_integer(unsigned(read_reg_1)))) srl to_integer(unsigned(shamt)) );
+				end if;
+				if ( wr = '1' and she = '1' and dir = '1' ) then -- Left shift.
+					reg_file(to_integer(unsigned(write_reg))) <= std_logic_vector ( unsigned(reg_file(to_integer(unsigned(read_reg_1)))) sll to_integer(unsigned(shamt)) );
+				end if;
+			end if;
+		end process;
+
+		read_data_1 <= reg_file(to_integer(unsigned(read_reg_1)));
+		read_data_2 <= reg_file(to_integer(unsigned(read_reg_2)));
+
+end architecture;

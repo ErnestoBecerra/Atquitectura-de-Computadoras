@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Vivado v2020.1 (64-bit)
+# SW Build 2902540 on Wed May 27 19:54:49 MDT 2020
+# IP Build 2902112 on Wed May 27 22:43:36 MDT 2020
+# Start of session at: Mon Oct 25 22:56:42 2021
+# Process ID: 8832
+# Current directory: C:/Users/ERNESTO/Documents/DANIEL/IPN/ESCOM/Quinto_Semestre/ARQUI/Memoria_de_datos/Memoria_de_datos.runs/synth_1
+# Command line: vivado.exe -log data_memory.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source data_memory.tcl
+# Log file: C:/Users/ERNESTO/Documents/DANIEL/IPN/ESCOM/Quinto_Semestre/ARQUI/Memoria_de_datos/Memoria_de_datos.runs/synth_1/data_memory.vds
+# Journal file: C:/Users/ERNESTO/Documents/DANIEL/IPN/ESCOM/Quinto_Semestre/ARQUI/Memoria_de_datos/Memoria_de_datos.runs/synth_1\vivado.jou
+#-----------------------------------------------------------
+source data_memory.tcl -notrace
